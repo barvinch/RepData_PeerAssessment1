@@ -128,7 +128,7 @@ mchange <- ifelse(mn_st2 > mn_st, "increased",
 ```
 
 With filled NAs **Mean** is steps per day is `r mn_st2` and **Median** is `r md_st2`, compated to `r mn_st` and `r md_st` correspondingly.    
-Total number of steps mean `r mchange`.
+Total number of steps mean `r mchange`.  
 
 ##Steps on weekdays and weekend
 
