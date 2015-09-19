@@ -1,8 +1,6 @@
 ---
 title: "Reproducible Research. Assignment 1"
-output:
-  html_document:
-    fig_caption: yes
+fig_caption: yes
 ---
 
 This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
@@ -39,6 +37,8 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 
 ```{r mean_median}
+# sum of steps by days
+st_d <- aggregate(activity$steps, by=list(day=activity$date), FUN=sum) 
 # Mean and median of steps
 mn_st <- mean(st_d$x, na.rm = TRUE)
 mn_st <- as.character(format(mn_st, digits = 6)) # make clear value formatted 
@@ -52,8 +52,6 @@ md_st <- as.character(format(md_st, digits = 6))  # make clear value formatted
 
 
 ```{r step_hist}
-# sum of steps by days
-st_d <- aggregate(activity$steps, by=list(day=activity$date), FUN=sum) 
 # Histogram of steps by days
 hist(st_d$x, breaks = 20, xlab = "Steps", main = "steps per day histogram")
 ```
