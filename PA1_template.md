@@ -9,7 +9,8 @@ This assignment makes use of data from a personal activity monitoring device. Th
 
 
 
-```{r load_data}
+
+```r
 ## Download file to temp file at local path
 temp<-"repdata-data-activity.zip" ## Get file from local path
 if (!file.exists(temp))
@@ -20,6 +21,16 @@ unzip(zipfile = temp)
 ## Read csv file
 activity <- read.csv2("activity.csv", header = TRUE, sep = ",")
 str(activity)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
+```r
 # Convert date from text
 activity$dt <- as.Date(activity$date, '%Y-%m-%d')
 activity$wday <- weekdays(activity$dt) # add weekdays
@@ -38,7 +49,8 @@ The variables included in this dataset are:
 The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations in this dataset.
 
 
-```{r mean_median}
+
+```r
 # Mean and median of steps
 mn_st <- mean(st_d$x, na.rm = TRUE)
 mn_st <- as.character(format(mn_st, digits = 6)) # make clear value formatted 
@@ -48,19 +60,23 @@ md_st <- as.character(format(md_st, digits = 6))  # make clear value formatted
 
 ##Mean and median of steps per day
 
-**Mean** is steps per day is `r mn_st` and **Median** is `r md_st`, you can see it also on histogram. 
+**Mean** is steps per day is 10766.2 and **Median** is 10765, you can see it also on histogram. 
 
 
-```{r step_hist}
+
+```r
 # sum of steps by days
 st_d <- aggregate(activity$steps, by=list(day=activity$date), FUN=sum) 
 # Histogram of steps by days
 hist(st_d$x, breaks = 20, xlab = "Steps", main = "steps per day histogram")
 ```
 
+![plot of chunk step_hist](figure/step_hist-1.png) 
+
 ##Average daily activity pattern
 
-```{r st5min}
+
+```r
 # average of steps by 5 minutes intervals
 st_5 <- aggregate(activity[!is.na(activity$steps),]$steps, 
                   by=list(interval=activity[!is.na(activity$steps),]$interval), FUN=mean) 
@@ -77,22 +93,27 @@ with(st_5,
      )) 
 ```
 
+![plot of chunk st5min](figure/st5min-1.png) 
 
-```{r max_steps}
+
+
+```r
 mx_st <- st_5[which.max(st_5$x),]
 ```
 
-5 minute interval of `r mx_st$interval`  contains the maximum number of steps = `r mx_st$x`.  
+5 minute interval of 835  contains the maximum number of steps = 206.1698113.  
 
 ###Missing values
  
-```{r na_v}
+
+```r
 na.v <- sum(is.na(activity$steps))
-``` 
+```
 
-Data contains `r na.v` missing values.
+Data contains 2304 missing values.
 
-```{r weekday_steps}
+
+```r
 stwd <- aggregate(activity[!is.na(activity$steps),]$steps, 
                   by=list(interval=activity[!is.na(activity$steps),]$interval,
                           wday=activity[!is.na(activity$steps),]$wday),
@@ -105,11 +126,14 @@ g+ geom_line() +
   labs(title = "Avg steps per 5 min inteval")  + labs( y = "steps")         
 ```
 
+![plot of chunk weekday_steps](figure/weekday_steps-1.png) 
+
 As we can see from graph above, number of steps mean is different for week days.
 So my strategy is to fill missing values with such mean by week day and 5 minutes interval.
 
 
-```{r fill_na}
+
+```r
 filled_na <- merge(activity, stwd, by=c("wday", "interval"))
 filled_na$filled <- ifelse(!is.na(filled_na$steps), filled_na$steps, filled_na$x)
 
@@ -117,7 +141,11 @@ filled_na$filled <- ifelse(!is.na(filled_na$steps), filled_na$steps, filled_na$x
 st_d2 <- aggregate(filled_na$filled, by=list(day=filled_na$date), FUN=sum) 
 # Histogram of steps by days
 hist(st_d2$x, breaks = 20, xlab = "Steps", main = "steps per day histogram, filled missed data")
+```
 
+![plot of chunk fill_na](figure/fill_na-1.png) 
+
+```r
 # Mean and median of steps
 mn_st2 <- mean(st_d2$x, na.rm = TRUE)
 mn_st2 <- as.character(format(mn_st2, digits = 6)) # make clear value formatted 
@@ -127,14 +155,15 @@ mchange <- ifelse(mn_st2 > mn_st, "increased",
                   ifelse(mn_st2 = mn_st, "not changed", "decresaed"))
 ```
 
-With filled NAs **Mean** is steps per day is `r mn_st2` and **Median** is `r md_st2`, compated to `r mn_st` and `r md_st` correspondingly.    
-Total number of steps mean `r mchange`.
+With filled NAs **Mean** is steps per day is 10821.2 and **Median** is 11015, compated to 10766.2 and 10765 correspondingly.    
+Total number of steps mean increased.
 
 ##Steps on weekdays and weekend
 
 In order to see is there difference in number of steps pattern on weekdays and weekend, I add new factor in our dataset.
 Below you can see graph illustrating such patterns. 
-```{r daysoff}
+
+```r
 filled_na$daysoff <- ifelse(filled_na$wday %in% c("Sunday", "Saturday"), 
                             "Weekend", "Weekdays")
 
@@ -149,4 +178,6 @@ g+ geom_line() +
   facet_grid(wday ~ .) +       # facets by weekdays
   labs(title = "Avg steps per 5 min inteval")  + labs( y = "steps") 
 ```
+
+![plot of chunk daysoff](figure/daysoff-1.png) 
 
